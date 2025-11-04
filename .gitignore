@@ -51,3 +51,4 @@ exercises/src/Exercise 1/cleaned_data/
 exercises/src/Exercise 1/raw_data/
 exercises/src/Exercise 1/lemmatized_data/
 exercises/src/Exercise 1/tf_idf_vectors/
+exercises/src/Exercise 1/word_to_vec/

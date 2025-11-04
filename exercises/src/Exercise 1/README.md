@@ -10,3 +10,5 @@
 (נדרש להתקין את המאגר באנגלית -> python -m spacy download en_core_web_sm)
 
 כדי ליצור וקטורים tf-idf יש להריץ את הקובץ data_vectoriztion.py
+
+לקבלת הווקטורים של word2vec יש להריץ את הקובץ data_wordtove.py
