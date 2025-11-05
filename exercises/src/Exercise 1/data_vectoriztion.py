@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy.sparse import save_npz
 
-DATA_FOLDER = "lemmatized_data/"
+DATA_FOLDER = "lemmatized_data/" #/cleaned_data/
 
 files = glob.glob(os.path.join(DATA_FOLDER, "*.txt"))
 documents = []
