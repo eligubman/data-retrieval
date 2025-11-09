@@ -8,7 +8,7 @@ import requests
 
 BASE_URL = "https://www.theyworkforyou.com/pwdata/scrapedxml/debates/"
 START_FILE = "debates2023-06-28d.xml"
-DATA_DIR = Path(__file__).resolve().parent / "raw_data"
+DATA_DIR = Path(__file__).resolve().parent / "data/raw_data"
 
 
 def fetch_available_files() -> list[str]:

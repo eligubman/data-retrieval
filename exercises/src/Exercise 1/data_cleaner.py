@@ -5,8 +5,9 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 
 BASE_DIR = Path(__file__).resolve().parent
-RAW_DATA_DIR = BASE_DIR / "raw_data"
-CLEANED_DATA_DIR = BASE_DIR / "cleaned_data"
+RAW_DATA_DIR = BASE_DIR / "data/raw_data"
+CLEANED_DATA_DIR = BASE_DIR / "data/cleaned_data"
+TEXT_DATA_DIR = BASE_DIR / "data/cleaned_text"
 
 _TOKEN_PATTERN = re.compile(
     r"\r\n|\r|\n"
@@ -68,6 +69,21 @@ def _process_file(source: Path, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     tree.write(destination, encoding="utf-8", xml_declaration=True)
 
+    text_output = _collect_text(root)
+    text_destination = TEXT_DATA_DIR / f"{source.stem}.txt"
+    text_destination.parent.mkdir(parents=True, exist_ok=True)
+    text_destination.write_text(text_output, encoding="utf-8")
+
+
+def _collect_text(root: ET.Element) -> str:
+    raw_text = "".join(root.itertext())
+    lines = []
+    for line in raw_text.splitlines():
+        cleaned = line.strip()
+        if cleaned:
+            lines.append(cleaned)
+    return "\n".join(lines)
+
 
 def main() -> None:
     if not RAW_DATA_DIR.exists():
@@ -81,7 +97,7 @@ def main() -> None:
     for source_path in files:
         target_path = CLEANED_DATA_DIR / source_path.name
         _process_file(source_path, target_path)
-        print(f"Cleaned {source_path.name}")
+        print(f"Processed {source_path.name}")
 
 
 if __name__ == "__main__":
