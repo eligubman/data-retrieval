@@ -46,11 +46,6 @@ Thumbs.db
 .env.*
 *.env
 
-# Scraped data outputs
-exercises/src/Exercise 1/data/cleaned_data/
-exercises/src/Exercise 1/data/raw_data/
-exercises/src/Exercise 1/data/lemmatized_data/
-exercises/src/Exercise 1/metrics/tf_idf_vectors/
-exercises/src/Exercise 1/metrics/word_to_vec/
-exercises/src/Exercise 1/metrics/simcse_output/
-exercises/src/Exercise 1/data/cleaned_text/
+# Exercise 1 generated artifacts
+exercises/src/Exercise 1/data/
+exercises/src/Exercise 1/metrics/
