@@ -34,7 +34,6 @@ documents = []
 file_names = []
 
 def extract_text_from_xml(file_path):
-    """חילוץ טקסט מכל תגית שיש לה תוכן"""
     try:
         parser = ET.XMLParser(encoding="utf-8")
         tree = ET.parse(file_path, parser=parser)
@@ -43,13 +42,11 @@ def extract_text_from_xml(file_path):
         for elem in root.iter():
             if elem.text:
                 text = elem.text.strip()
-                # מסירים יותר מדי רווחים
                 text = re.sub(r'\s+', ' ', text)
                 if text:
                     text_parts.append(text)
         return " ".join(text_parts)
     except ET.ParseError:
-        # אם הקובץ לא XML תקין, נקרא כטקסט רגיל
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
             return f.read()
 
@@ -60,7 +57,7 @@ for file in sorted(RAW_DIR.glob("*")):
         text = extract_text_from_xml(file)
         text = text.strip()
         if len(text) < 10:
-            continue  # מסמכים ריקים
+            continue 
         documents.append(text)
         file_names.append(file.name)
 
@@ -101,7 +98,6 @@ document_embeddings = model.encode(
 document_embeddings = np.array(document_embeddings)
 print("Embedding shape:", document_embeddings.shape)
 
-# שמירת תוצאות
 np.save(OUTPUT_DIR / "document_embeddings_simcse.npy", document_embeddings)
 pd.DataFrame({"file": file_names}).to_csv(OUTPUT_DIR / "file_map_simcse.csv", index=False)
 model.save(str(OUTPUT_DIR / "simcse_model"))

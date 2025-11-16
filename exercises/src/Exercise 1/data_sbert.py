@@ -31,7 +31,6 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _extract_text(file_path: Path) -> str:
-    """Return cleaned text for a raw XML document."""
     try:
         parser = ET.XMLParser(encoding="utf-8")
         tree = ET.parse(file_path, parser=parser)
