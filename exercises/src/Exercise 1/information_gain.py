@@ -16,7 +16,7 @@ TFIDF_DIR = BASE_DIR / f"metrics/tf_idf_vectors/{LABEL}"
 MATRIX_PATH = TFIDF_DIR / "tfidf_sparse_matrix.npz"
 FEATURES_PATH = TFIDF_DIR / "feature_names.csv"
 
-OUTPUT_CSV = BASE_DIR / f"information_gain_{LABEL}.csv"
+OUTPUT_CSV = TFIDF_DIR / f"information_gain_{LABEL}.csv"
 
 
 # -------------------------------------------------
