@@ -11,13 +11,23 @@
 2. **ניקוי מבני XML** – `uv run data_cleaner.py` יוצר גרסאות נקיות ב-`data/cleaned_data` ובמקביל מפיק טקסטים גולמיים ב-`data/cleaned_text`.
 3. **למטיזציה** – `uv run data_lemmatized.py` (לאחר `uv run python -m spacy download en_core_web_sm`) מפיק קבצי למות אל תוך `data/lemmatized_data`.
 4. **וקטורים מבוססי BM25/Okapi** – `uv run data_vectoriztion.py` קורא את שני התיקיות ומייצר מטריצות BM25 דלילות (`metrics/tf_idf_vectors/<corpus>/tfidf_sparse_matrix.npz`) יחד עם אובייקט BM25 (`bm25_model.joblib`) וקובץ מונחים.
+בעצם עושה מטריצות של emmbeding והוא גם מתחשב בגודל הקובץ עם .הנרמול 
 5. **Word2Vec** – `uv run data_wordtovec.py` מאמן מודלים (עם ובלי מילות עצירה) ושומר את הווקטורים תחת `metrics/word_to_vec/...`.
+בעצם עוזר לנו למצוא קשר סמנטי בין המילים
+
+6. **SBERT** - ממפה את המסמכים למרחב וקטורי כדי לאפשר חיפוש סמנטי בין משפטים שלמים או מסמכים שלמים
+
+7. **SimCSE** - דרך נוספת לייצוג מסמכים כמו ה SBERT אבל יותר מדויק 
+ובנוסף זה עוד מודל לאימות 
+
 6. **הטמעת מסמכים** –
 	- `uv run data_sbert.py` (דורש `huggingface_hub login`) מחזיר `metrics/sbert_output`.
 	- `uv run data_simcse_embeddings.py` פועל באותה צורה ומגישה fallback אוטומטי לדגם MiniLM.
 7. **מדדי חשיבות** –
 	- `uv run information_gain.py` מייצא את `information_gain_lemmatized_data.csv`.
+	אנחנו מחשבים כל מילה עד כמה היא חשובה ביחס לשאר המילים
 	- `uv run sum_culoms_information_gain.py` מסכם את ציוני ה-BM25 לעמודות ושומר את `tfidf_column_sums.csv`.
+	בעצם כאן בדקנו כל עמודה ביחס לסכום הכולל של הטבלה 
 
 ## טבלאות (20 רשומות ראשונות בלבד)
 
