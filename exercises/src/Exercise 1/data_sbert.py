@@ -10,10 +10,6 @@ import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 
-from huggingface_hub import login
-
-login()
-
 BASE_DIR = Path(__file__).resolve().parent
 
 _input_override = os.environ.get("SBERT_INPUT_DIR")
