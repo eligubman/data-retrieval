@@ -9,7 +9,8 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 from sklearn.metrics.pairwise import cosine_distances
 import matplotlib.pyplot as plt
 import umap
-
+import matplotlib.patches as mpatches
+import seaborn as sns
 
 # --- helper: load vocab (robust to header/no-header) ---
 def load_vocab_csv(path):
@@ -157,43 +158,35 @@ um = umap.UMAP(n_neighbors=15, min_dist=0.1, metric="cosine")
 embedding = um.fit_transform(X)
 
 # ------------------------------
-# PLOT TRUE LABELS
+# PLOT WITH SEABORN & SAVE
 # ------------------------------
-plt.figure(figsize=(10,6))
-plt.scatter(
-    embedding[:,0], embedding[:,1],
-    c=labels,
-    cmap="coolwarm",
-    s=10,
-    alpha=0.8
+import os
+os.makedirs("images", exist_ok=True)
+
+# Create a DataFrame for easier plotting with Seaborn
+plot_df = pd.DataFrame(embedding, columns=["UMAP1", "UMAP2"])
+plot_df["True Label"] = ["USA" if l == 1 else "UK" for l in labels]
+
+# 1. Plot True Labels
+plt.figure(figsize=(10, 6))
+sns.scatterplot(
+    data=plot_df, x="UMAP1", y="UMAP2", hue="True Label", palette="coolwarm", s=15, alpha=0.7
 )
-plt.title("UMAP – True Labels (Red = USA, Blue = UK)", fontsize=14)
+plt.title("UMAP – True Labels", fontsize=14)
+plt.savefig("images/umap_true_labels.png", dpi=300, bbox_inches="tight")
+print("Saved images/umap_true_labels.png")
+plt.close()
 
-legend_handles = [
-    mpatches.Patch(color=plt.cm.coolwarm(0.2), label="UK (label 0)"),
-    mpatches.Patch(color=plt.cm.coolwarm(0.8), label="USA (label 1)")
-]
-plt.legend(handles=legend_handles, title="Legend")
-plt.xlabel("UMAP dimension 1")
-plt.ylabel("UMAP dimension 2")
-plt.grid(alpha=0.2)
-plt.show()
-
-# ------------------------------
-# PLOT CLUSTER ASSIGNMENTS
-# ------------------------------
+# 2. Plot Cluster Assignments
 for method, cl in cluster_outputs.items():
-    plt.figure(figsize=(10,6))
-    sc = plt.scatter(
-        embedding[:,0], embedding[:,1],
-        c=cl,
-        cmap="tab20",
-        s=10,
-        alpha=0.9
+    plot_df["Cluster"] = cl
+    plt.figure(figsize=(10, 6))
+    sns.scatterplot(
+        data=plot_df, x="UMAP1", y="UMAP2", hue="Cluster", palette="tab20", s=15, alpha=0.7, legend="full"
     )
-    plt.colorbar(sc, label="Cluster ID")
     plt.title(f"UMAP – Clusters from {method}", fontsize=14)
-    plt.xlabel("UMAP dimension 1")
-    plt.ylabel("UMAP dimension 2")
-    plt.grid(alpha=0.2)
-    plt.show()
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(f"images/umap_{method}.png", dpi=300, bbox_inches="tight")
+    print(f"Saved images/umap_{method}.png")
+    plt.close()

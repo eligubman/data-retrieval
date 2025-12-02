@@ -62,7 +62,7 @@ def clean_folder(input_folder, output_folder):
 # ---- MAIN ----
 if __name__ == "__main__":
 
-    clean_folder("data/US_congressional_speeches_Text_Files/US_congressional_speeches_Text_Files", "clean_data/cleaned_us")
-    clean_folder("data/UK_british_debates_text_files_normalize/british_debates_text_files_normalize", "clean_data/cleaned_uk")
+    clean_folder("data/us/US_congressional_speeches_Text_Files", "data/cleaned_us")
+    clean_folder("data/uk/british_debates_text_files_normalize", "data/cleaned_uk")
 
     print("\n✔ Done! Cleaned files saved in 'cleaned_us/' and 'cleaned_uk/'")

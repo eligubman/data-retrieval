@@ -6,11 +6,16 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "gensim>=4.4.0",
+    "hdbscan>=0.8.40",
+    "matplotlib>=3.10.7",
     "nltk>=3.9.2",
+    "numpy>=2.3.4",
     "pandas>=2.3.3",
     "pip>=25.3",
     "ruff>=0.14.2",
     "scikit-learn>=1.7.2",
+    "seaborn>=0.13.2",
     "sentence-transformers>=5.1.2",
     "spacy[apple]>=3.8.7",
+    "umap-learn>=0.5.9.post2",
 ]
