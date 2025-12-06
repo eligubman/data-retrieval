@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from scipy.sparse import load_npz, vstack, coo_matrix
@@ -32,12 +33,12 @@ def reindex_matrix_to_union(mat, old_vocab, union_index, new_vocab_size):
 
 def load_data():
     print("🔄 Loading data...")
-    uk_mat = load_npz("matrices/uk_bm25.npz")
-    us_mat = load_npz("matrices/us_bm25.npz")
-    uk_docs = pd.read_csv("matrices/uk_documents.csv")
-    us_docs = pd.read_csv("matrices/us_documents.csv")
-    uk_vocab = load_vocab_csv("matrices/uk_vocab.csv")
-    us_vocab = load_vocab_csv("matrices/us_vocab.csv")
+    uk_mat = load_npz("matrices/lemmatized_uk_bm25.npz")
+    us_mat = load_npz("matrices/lemmatized_us_bm25.npz")
+    uk_docs = pd.read_csv("matrices/lemmatized_uk_documents.csv")
+    us_docs = pd.read_csv("matrices/lemmatized_us_documents.csv")
+    uk_vocab = load_vocab_csv("matrices/lemmatized_uk_vocab.csv")
+    us_vocab = load_vocab_csv("matrices/lemmatized_us_vocab.csv")
 
     # Build Union Vocab
     union_vocab = list(uk_vocab)
@@ -109,8 +110,10 @@ def run_classification():
     print(results_df.to_string(index=False))
     
     # Save to CSV
-    results_df.to_csv("classification/classification_results.csv", index=False)
-    print("\n💾 Saved results to 'classification/classification_results.csv'")
+    if not os.path.exists("classification"):
+        os.makedirs("classification")
+    results_df.to_csv("classification/lemmatized_classification_results.csv", index=False)
+    print("\n💾 Saved results to 'classification/lemmatized_classification_results.csv'")
 
 if __name__ == "__main__":
     run_classification()

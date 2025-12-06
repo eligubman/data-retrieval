@@ -92,7 +92,7 @@ def build_bm25_matrix(input_folder, output_prefix, k1=1.5, b=0.75):
 
 # ---- MAIN ----
 if __name__ == "__main__":
-    build_bm25_matrix("data/cleaned_us", "matrices/us")
-    build_bm25_matrix("data/cleaned_uk", "matrices/uk")
+    build_bm25_matrix("lemmatized_data/lemmatized_us", "matrices/lemmatized_us")
+    build_bm25_matrix("lemmatized_data/lemmatized_uk", "matrices/lemmatized_uk")
 
-    print("\n🎉 Done! BM25 matrices created.")
+    print(" Done! BM25 matrices created.")

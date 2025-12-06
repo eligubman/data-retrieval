@@ -40,14 +40,14 @@ def reindex_matrix_to_union(mat, old_vocab, union_index, new_vocab_size):
 # ============================
 #    LOAD MATRICES + VOCABS
 # ============================
-uk_mat = load_npz("matrices/uk_bm25.npz")
-us_mat = load_npz("matrices/us_bm25.npz")
+uk_mat = load_npz("matrices/lemmatized_uk_bm25.npz")
+us_mat = load_npz("matrices/lemmatized_us_bm25.npz")
 
-uk_docs = pd.read_csv("matrices/uk_documents.csv")
-us_docs = pd.read_csv("matrices/us_documents.csv")
+uk_docs = pd.read_csv("matrices/lemmatized_uk_documents.csv")
+us_docs = pd.read_csv("matrices/lemmatized_us_documents.csv")
 
-uk_vocab = load_vocab_csv("matrices/uk_vocab.csv")
-us_vocab = load_vocab_csv("matrices/us_vocab.csv")
+uk_vocab = load_vocab_csv("matrices/lemmatized_uk_vocab.csv")
+us_vocab = load_vocab_csv("matrices/lemmatized_us_vocab.csv")
 
 print("uk_mat.shape:", uk_mat.shape, "us_mat.shape:", us_mat.shape)
 print("uk_vocab:", len(uk_vocab), "us_vocab:", len(us_vocab))
@@ -173,8 +173,8 @@ sns.scatterplot(
     data=plot_df, x="UMAP1", y="UMAP2", hue="True Label", palette="coolwarm", s=15, alpha=0.7
 )
 plt.title("UMAP – True Labels", fontsize=14)
-plt.savefig("images/umap_true_labels.png", dpi=300, bbox_inches="tight")
-print("Saved images/umap_true_labels.png")
+plt.savefig("images/lemmatized_umap_true_labels.png", dpi=300, bbox_inches="tight")
+print("Saved images/lemmatized_umap_true_labels.png")
 plt.close()
 
 # 2. Plot Cluster Assignments
@@ -187,6 +187,6 @@ for method, cl in cluster_outputs.items():
     plt.title(f"UMAP – Clusters from {method}", fontsize=14)
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.tight_layout()
-    plt.savefig(f"images/umap_{method}.png", dpi=300, bbox_inches="tight")
-    print(f"Saved images/umap_{method}.png")
+    plt.savefig(f"images/lemmatized_umap_{method}.png", dpi=300, bbox_inches="tight")
+    print(f"Saved images/lemmatized_umap_{method}.png")
     plt.close()
