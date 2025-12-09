@@ -32,7 +32,7 @@ def reindex_matrix_to_union(mat, old_vocab, union_index, new_vocab_size):
     return new_coo.tocsr()
 
 def load_data():
-    print("🔄 Loading data...")
+    print(" Loading data...")
     uk_mat = load_npz("matrices/lemmatized_uk_bm25.npz")
     us_mat = load_npz("matrices/lemmatized_us_bm25.npz")
     uk_docs = pd.read_csv("matrices/lemmatized_uk_documents.csv")
@@ -58,7 +58,7 @@ def load_data():
     docs = pd.concat([uk_docs.assign(source=0), us_docs.assign(source=1)], ignore_index=True)
     y = docs["source"].values
     
-    print(f"✅ Data loaded. Shape: {X.shape}")
+    print(f" Data loaded. Shape: {X.shape}")
     return X, y
 
 def run_classification():
@@ -88,7 +88,7 @@ def run_classification():
 
     results_data = []
 
-    print("\n🚀 Starting 10-Fold Cross-Validation...")
+    print("\n Starting 10-Fold Cross-Validation...")
     
     for name, clf in classifiers.items():
         print(f"   Running {name}...")
@@ -106,14 +106,14 @@ def run_classification():
 
     # Create DataFrame
     results_df = pd.DataFrame(results_data)
-    print("\n🏆 Classification Results (Average of 10 Folds):")
+    print("\n Classification Results (Average of 10 Folds):")
     print(results_df.to_string(index=False))
     
     # Save to CSV
     if not os.path.exists("classification"):
         os.makedirs("classification")
     results_df.to_csv("classification/lemmatized_classification_results.csv", index=False)
-    print("\n💾 Saved results to 'classification/lemmatized_classification_results.csv'")
+    print("\n Saved results to 'classification/lemmatized_classification_results.csv'")
 
 if __name__ == "__main__":
     run_classification()

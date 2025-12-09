@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.sparse import load_npz, vstack, coo_matrix
-from sklearn.cluster import KMeans, DBSCAN
+from sklearn.cluster import KMeans, DBSCAN ,HDBSCAN
 from sklearn.mixture import GaussianMixture
 from sklearn.decomposition import PCA
 import hdbscan
@@ -91,7 +91,7 @@ def evaluate_clustering(true_labels, cluster_labels):
 
     for c in unique_clusters:
         if c == -1:
-            mapping[c] = 0
+            mapping[c] = -1
             continue
 
         mask = cluster_labels == c
