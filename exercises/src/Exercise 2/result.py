@@ -91,7 +91,7 @@ def evaluate_clustering(true_labels, cluster_labels):
 
     for c in unique_clusters:
         if c == -1:
-            mapping[c] = -1
+            mapping[c] = 0
             continue
 
         mask = cluster_labels == c

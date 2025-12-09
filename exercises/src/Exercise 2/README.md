@@ -92,6 +92,19 @@ We compare how different unsupervised algorithms group the data without knowing 
 - **Why it looks like this**: GMM is more flexible than KMeans as it can model elliptical clusters. Since the data projects into two distinct blobs that are roughly Gaussian in shape, GMM had no trouble fitting distributions to them and separating the countries.
 
 ---
+this is the resulot for the lemmatztion data
+
+KMeans {'precision': 0.5232558139534884, 'recall': 1.0, 'f1': 0.6870229007633588, 'accuracy': 0.5239477503628447}
+DBSCAN {'precision': 1.0, 'recall': 0.2916666666666667, 'f1': 0.45161290322580644, 'accuracy': 0.6298984034833092}
+HDBSCAN {'precision': 1.0, 'recall': 0.1361111111111111, 'f1': 0.2396088019559902, 'accuracy': 0.548621190130624}
+GMM {'precision': 1.0, 'recall': 1.0, 'f1': 1.0, 'accuracy': 1.0}
+
+and this is for cleaned data
+
+KMeans {'precision': 0.5357142857142857, 'recall': 1.0, 'f1': 0.6976744186046512, 'accuracy': 0.5471698113207547}
+DBSCAN {'precision': 1.0, 'recall': 0.03333333333333333, 'f1': 0.06451612903225806, 'accuracy': 0.4949201741654572}
+HDBSCAN {'precision': 1.0, 'recall': 0.12222222222222222, 'f1': 0.21782178217821782, 'accuracy': 0.5413642960812772}
+GMM {'precision': 0.5381165919282511, 'recall': 1.0, 'f1': 0.6997084548104956, 'accuracy': 0.5515239477503628}
 
 ## 📈 Part B: Supervised Learning Results
 
