@@ -47,6 +47,10 @@ def clean_folder(input_folder, output_folder):
         if not os.path.isfile(full_path):
             continue
 
+        # skip non-txt files
+        if not filename.lower().endswith(".txt"):
+            continue
+
         with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
             raw = f.read()
 

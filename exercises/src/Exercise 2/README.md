@@ -1,3 +1,8 @@
+בס"ד  
+אפרים אלגרבלי - 212451074  
+אלי גובמן - 213662364  
+---
+
 # Exercise 2: Text Classification & Clustering (US vs UK)
 
 This project analyzes parliamentary speeches from the US and UK to determine if they can be distinguished by their vocabulary and language patterns. We apply both unsupervised learning (clustering) and supervised learning (classification) techniques.
@@ -5,6 +10,7 @@ This project analyzes parliamentary speeches from the US and UK to determine if 
 ## 📂 Project Structure
 
 - `data_cleaner.py`: Preprocesses raw text files (removes metadata, HTML, country names).
+- `data_lemmatized.py`: Lemmatize raw text files.
 - `BM25.py`: Converts cleaned text into numerical vectors using the BM25 algorithm.
 - `result.py`: Performs unsupervised clustering (KMeans, DBSCAN, HDBSCAN, GMM) and visualizes results using UMAP.
 - `classification.py`: Trains and evaluates 5 supervised classifiers using 10-fold cross-validation.
@@ -40,35 +46,50 @@ This project analyzes parliamentary speeches from the US and UK to determine if 
 
 ## 📊 Part A: Analysis of Clustering Results
 
-The `result.py` script generates UMAP visualizations saved in the `images/` folder. Here is how to interpret them:
+The `result.py` script generates UMAP visualizations saved in the `images/` folder. Here is how to interpret them based on the actual output:
 
 ### UMAP Projection
 UMAP (Uniform Manifold Approximation and Projection) reduces the high-dimensional BM25 vectors (thousands of words) into 2 dimensions for visualization. Points that are close together in the plot are similar in terms of their word usage.
 
-### 1. True Labels (`images/umap_true_labels.png`)
+### 1. True Labels
+![True Labels](images/lemmatized_umap_true_labels.png)
+
 - **What it shows**: The ground truth. Red points are US speeches, Blue points are UK speeches.
 - **Interpretation**:
-    - If you see two distinct, separated blobs (one red, one blue), it means the language used in US and UK parliaments is significantly different and easy to distinguish.
-    - If the points are mixed/overlapping, it means the vocabulary is very similar, making the task harder for clustering algorithms.
+    - The plot shows **two very distinct, well-separated clusters**.
+    - This indicates that the vocabulary and language patterns used in the US Congress vs. the UK Parliament are significantly different. The model can easily distinguish between them based on word usage alone.
+    - **Why it looks like this**: The clear separation suggests distinct political terminologies (e.g., "Senator" vs. "MP", "Congress" vs. "Parliament") and spelling differences (e.g., "color" vs. "colour") that strongly differentiate the two datasets.
 
 ### 2. Clustering Results
 We compare how different unsupervised algorithms group the data without knowing the labels.
 
-- **KMeans (`images/umap_KMeans.png`)**:
-    - Forces the data into $k=2$ clusters.
-    - **Look for**: Does the split match the True Labels split? KMeans assumes spherical clusters, so it might fail if the natural clusters are irregular shapes.
+#### KMeans
+![KMeans Clustering](images/lemmatized_umap_KMeans.png)
 
-- **DBSCAN (`images/umap_DBSCAN.png`)**:
-    - Density-based clustering. Points in low-density regions are labeled as noise (Cluster -1).
-    - **Look for**: How many points are "noise"? Does it find the two main groups, or does it merge them into one big cluster? If `eps` is too small, everything is noise. If too large, everything is one cluster.
+- **Algorithm**: Forces the data into $k=2$ clusters.
+- **Observation**: KMeans performed **excellently**. It successfully identified the two main groups (Cluster 0 and Cluster 1) which correspond almost perfectly to the True Labels.
+- **Why it looks like this**: Since the two groups are naturally well-separated and roughly globular in the high-dimensional space, KMeans' assumption of spherical clusters holds true here, allowing it to draw a clean boundary between them.
 
-- **HDBSCAN (`images/umap_HDBSCAN.png`)**:
-    - Hierarchical DBSCAN. It finds clusters of varying densities.
-    - **Look for**: Often more robust than DBSCAN. Check if it identifies the two countries as separate dense regions or if it finds sub-topics within the speeches instead.
+#### DBSCAN
+![DBSCAN Clustering](images/lemmatized_umap_DBSCAN.png)
 
-- **GMM (`images/umap_GMM.png`)**:
-    - Gaussian Mixture Models. Probabilistic assignment.
-    - **Look for**: Similar to KMeans but more flexible (can handle elliptical clusters). It often works well if the data is somewhat normally distributed in the reduced PCA space.
+- **Algorithm**: Density-based clustering. Points in low-density regions are labeled as noise (Cluster -1).
+- **Observation**: DBSCAN identified the main structures but **fragmented the US cluster** into two parts (Cluster 1 and Cluster 2) and labeled some edge points as noise (Cluster -1).
+- **Why it looks like this**: DBSCAN is sensitive to density variations. It seems the US cluster has regions of slightly different densities, causing the algorithm to split it. The "noise" points are likely speeches that use unique vocabulary or are shorter, making them outliers in the vector space.
+
+#### HDBSCAN
+![HDBSCAN Clustering](images/lemmatized_umap_HDBSCAN.png)
+
+- **Algorithm**: Hierarchical DBSCAN. It finds clusters of varying densities.
+- **Observation**: HDBSCAN successfully found the two main cores (Cluster 0 and Cluster 1) but was **conservative**, labeling many points around the edges as noise (Cluster -1).
+- **Why it looks like this**: HDBSCAN prioritizes high-confidence clusters. It correctly identified the dense centers of the US and UK groups but treated the less typical speeches (the "fuzzier" outer edges of the blobs) as noise rather than forcing them into a cluster.
+
+#### GMM (Gaussian Mixture Models)
+![GMM Clustering](images/lemmatized_umap_GMM.png)
+
+- **Algorithm**: Probabilistic assignment assuming Gaussian distributions.
+- **Observation**: Like KMeans, GMM performed **very well**, creating a clean separation between the two groups (Cluster 0 and Cluster 1).
+- **Why it looks like this**: GMM is more flexible than KMeans as it can model elliptical clusters. Since the data projects into two distinct blobs that are roughly Gaussian in shape, GMM had no trouble fitting distributions to them and separating the countries.
 
 ---
 
