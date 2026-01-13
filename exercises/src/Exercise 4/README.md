@@ -22,14 +22,19 @@ Standard RAG systems are "time blind" (like exercie 3): they treat older and new
 
 1. Data Engineering (Temporal Indexing)
 
-- **Date Extraction:** Parsed filenames (e.g., `debates-2025-10-31.txt`) and metadata using regular expressions to extract dates.
-- **Normalization:** Converted all dates to ISO 8601 (`YYYY-MM-DD`).
-- **Metadata Storage:** Each chunk is stored with its timestamp and vector, e.g. `(text, vector, timestamp)`, enabling temporal filtering and decay-aware scoring during retrieval.
+- **Date Extraction:** Implemented Regex logic in data_loader.py to extract dates from filenames (e.g., debates2025-10-31.txt $\rightarrow$ 2025-10-31) and internal document headers.
+- **Normalization:** Converted all extracted dates to the standard ISO 8601 format (YYYY-MM-DD) to ensure consistent chronological sorting.
+- **Metadata Propagation:** Updated the chunking logic (chunker.py) to ensure that the timestamp metadata extracted at the document level is propagated down to every individual text chunk.
+- **Storage:** Each record in the vector store is a tuple of (Text_Content, Vector_Embedding, Timestamp), allowing for hybrid filtering during the retrieval phase.
 
 2. Retrieval Methods (Sparse vs. Dense)
 
-- **Sparse Retrieval (BM25):** Probabilistic keyword matching; effective for precise queries containing named entities or numeric facts.
-- **Dense Retrieval (Semantic Search):** Uses `sentence-transformers/all-MiniLM-L6-v2` to generate embeddings and capture semantic meaning when vocabulary changes over time.
+- **Sparse Retrieval (BM25):** mplemented using rank_bm25.
+Relies on probabilistic keyword matching.
+Use Case: Highly effective for precise queries containing specific entities (e.g., names, budget figures, specific bills).
+- **Dense Retrieval (Semantic Search):** Implemented using sentence-transformers (Model: all-MiniLM-L6-v2).
+Generates 384-dimensional embeddings to calculate Cosine Similarity.
+Use Case: Captures semantic meaning and nuance, which is critical for identifying changes in rhetoric (e.g., "crisis" vs. "challenge") even when specific keywords change over the years.
 
 3. Temporal Algorithms
 
