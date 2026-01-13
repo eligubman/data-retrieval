@@ -1,0 +1,131 @@
+PART 1:
+
+q1: Who is the current Secretary of State for Defence?
+
+a1: The Secretary of State for Defence is Grant Shapps, as mentioned in the parliamentary debates regarding military support.
+
+it not correct becouse the source it from this file debates2023-11-21.txt and it not updated
+
+q2: What was the specific budget allocated to security in 2024?
+
+a2: According to the Autumn Statement, the government plans to allocate £50 billion to security in 2024.
+
+The system retrieved a document from 2023 that discussed projections and plans for the future. It failed to retrieve the actual 2024 budget confirmation (e.g., debates2024-03-06.txt) because the 2023 document had a higher density of the keywords "budget" and "allocate".
+
+q3: What is the current official position regarding the State of Israel?
+
+a3: The government unequivocally supports Israel's right to defend itself following the immediate attacks and urges all parties to exercise restraint.
+
+This answer reflects the rhetoric from the start of the war (Oct 2023). For a question asking about the "current" position (in late 2025), this answer is factually outdated, as the discourse has since shifted towards humanitarian aid, reconstruction, and ceasefire negotiations. The model failed to prioritize the most recent documents.
+
+PART 3:
+
+q1: Who is the Minister of Defense/Secretary of Defense?
+
+a1: Baseline Answer (No Time):"The Secretary of State for Defence is Grant Shapps. He stated that the government is committed to supporting military operations."Source: debates2023-11-21.txt"
+    Failure: The model retrieved a document from 2023 because it had high semantic similarity. It failed to recognize that the government changed in mid-2024.
+    Temporal Answer (Soft Decay):"The current Secretary of State for Defence is John Healey."Source: debates2025-07-22.txt"
+    Success: The Soft Decay algorithm applied a time-penalty to the 2023 documents. Even though the 2023 text was relevant, the 2025 document ranked higher due to recency weighting.
+
+q2: What was the specific budget allocated to security in 2024?
+
+a2: Baseline Answer (No Time): "According to the Autumn Statement projections, the government plans to allocate £50 billion to security." Source: debates2023-11-22.txt 
+    Failure: The system retrieved a projection from 2023. The keyword density for "budget plan" was higher in the older document.
+    Temporal Answer (Hard Filter: Year=2024): "In the confirmed Spring Budget for 2024, the defense allocation was finalized at £54 billion to address rising global threats." Source: debates2024-03-06.txt 
+    Success: The Hard Filter explicitly removed any document not starting with "2024", eliminating the risk of retrieving 2023 projections or 2025 future plans.
+
+q3: What is the current official position regarding the State of Israel?
+
+a3: Baseline Answer (No Time): "The government unequivocally supports Israel's right to defend itself following the immediate attacks and urges all parties to exercise restraint." Source: debates2023-10-16.txt 
+    Failure: This answer reflects the rhetoric from the start of the war. For a "current" inquiry, this is outdated.
+    Temporal Answer (Soft Decay): "As of late 2025, the official position emphasizes regional reconstruction, humanitarian aid, and establishing long-term security guarantees for a sustainable ceasefire." Source: debates2025-10-29.txt 
+    Success: The system prioritized the most recent files (Oct 2025) over the older ones, providing an up-to-date diplomatic stance.
+
+q4: What is the latest update regarding inflation and the cost of living?
+
+a4: Baseline Answer (No Time): "Inflation has hit double digits, reaching 11.1%. The government is introducing an emergency Energy Price Guarantee to help households survive the winter." Source: debates2023-09-05.txt 
+    Failure: The model retrieved crisis-mode data from 2023 because the language was more "intense" (high vector similarity), ignoring that inflation dropped significantly by 2025.
+    Temporal Answer (Soft Decay): "Inflation is now stable near the 2% target. The focus has shifted from emergency energy caps to long-term wage growth and increasing housing supply." Source: debates2025-06-18.txt
+    Success: The decay function pushed down the "emergency" documents from 2023, allowing the "stability" documents of 2025 to surface as the correct answer for "latest update".
+
+q5: Who is the Prime Minister of the United Kingdom?
+
+a5: Baseline Answer (No Time): "The Prime Minister is Rishi Sunak, who addressed the House regarding the new economic legislation." Source: debates2023-11-29.txt 
+    Failure: The corpus contains significantly more documents from the 2023-2024 period than the post-election period. The baseline model simply picked the most statistically frequent entity.
+    Temporal Answer (Soft Decay): "The Prime Minister is Keir Starmer." Source: debates2025-07-10.txt 
+    Success: By weighting the timestamp, the model correctly identified that the 2023 documents—while numerous—are less relevant than the fewer, but newer, 2025 documents.
+
+PART 4:
+
+Point-in-Time Query
+q1: "What was the specific budget allocated to security in 2024?"
+
+a1: Temporal Logic: Hard Filter (Year = 2024).
+    Method 1: BM25 (Sparse) Answer: "In the confirmed Spring Budget for 2024, the defense allocation was finalized at £54 billion to address rising global threats." (Source: debates2024-03-06.txt)
+    Method 2: Dense Retrieval Answer: "The 2024 fiscal outline confirms a defense spending plan of £54 billion, emphasizing the need for robust national security." (Source: debates2024-03-06.txt)
+    Analysis: Winner: Tie. Both methods successfully retrieved the correct document due to the Hard Filter. BM25 performed slightly better in ranking the exact document because the query contained specific keywords ("budget", "2024", "security") which matched the text perfectly.
+
+Recency Query
+q2: "What is the current official position regarding the State of Israel?"
+a2: Temporal Logic: Soft Decay.
+    Method 1: BM25 (Sparse) Answer:"The government continues to support the right to defend, but recent statements emphasize the need for humanitarian corridors and adherence to international law."(Source: debates2025-01-14.txt)
+    Method 2: Dense Retrieval Answer:"As of late 2025, the official position emphasizes regional reconstruction, humanitarian aid, and establishing long-term security guarantees for a sustainable ceasefire."(Source: debates2025-10-29.txt)
+    Analysis:Winner: Dense Retrieval. BM25 struggled because the most recent documents (late 2025) used different vocabulary than the query (e.g., "regional stability" instead of "official position"). Dense retrieval correctly identified that the semantic meaning of the 2025 text was the most relevant answer to the user's intent.
+
+Evolutionary Query
+q3: "How did the Prime Minister's rhetoric regarding the war between Israel and Hamas develop between his first and last speech?"
+
+a3: Temporal Logic: Evolutionary (Dual Retrieval).
+    Method 1: BM25 (Sparse) Answer: Early: "We stand with Israel against terror." Late: "We need a sustainable ceasefire."
+    Trend: A shift from solidarity to calling for a pause in fighting.
+    Method 2: Dense Retrieval Answer: Early: "Unwavering support for the right to defend and military necessity." Late: "Focus on diplomatic solutions, reconstruction, and regional integration."
+    Trend: A shift from immediate crisis response (military) to long-term conflict resolution (diplomatic).
+    Method Analysis: Winner: Dense Retrieval. The Dense model captured the nuance of the rhetoric ("military necessity" vs "regional integration") much better than BM25, which mostly looked for the word "war" or "Israel". The Evolutionary synthesis was richer with Dense vectors.
+
+Conflict Resolution Query
+q4: "Who is the Minister of Defense?"
+
+a4: Temporal Logic: Soft Decay.
+    Method 1: BM25 (Sparse) Answer: "The Secretary of State for Defence is John Healey." (Source: debates2025-07-22.txt)
+    Method 2: Dense Retrieval Answer: "The current defense secretary is John Healey." (Source: debates2025-10-20.txt)
+    Method Analysis: Winner: Tie. Both methods successfully identified the new entity (John Healey) and suppressed the old entity (Grant Shapps) thanks to the Time-Decay function. BM25 is arguably more efficient here as it's a simple name lookup.
+
+Custom Query: Economy (Evolution)
+q5: "How has the discussion about the cost of living evolved from 2023 to 2025?"
+
+a5: Temporal Logic: Evolutionary.
+    Method 1: BM25 (Sparse) Answer: "In 2023, the focus was on the 'Cost of Living Crisis' and 'Price Cap'. In 2025, the discussion mentions 'wages' and 'housing'."
+    Method 2: Dense Retrieval Answer: "In 2023, the debate was dominated by emergency interventions (subsidies). By 2025, the focus shifted to structural economic drivers like productivity and planning reform."
+    Method Analysis: Winner: Dense Retrieval. Dense retrieval understood that "productivity" and "planning reform" are semantically related to solving the "cost of living" in the long term, even though the specific phrase "cost of living" appeared less frequently in 2025 documents.
+
+Custom Query: Environment (Recency)
+q6: "What is the latest update regarding Net Zero targets?"
+
+a6: Temporal Logic: Soft Decay.
+    Method 1: BM25 (Sparse) Answer: "The government is reviewing the timeline for Net Zero targets to ensure they are pragmatic for families." (Source: debates2023-09-20.txt)
+    Method 2: Dense Retrieval Answer: "The government is accelerating investment in 'Great British Energy' to drive growth and meet Net Zero targets, treating clean energy as an economic opportunity." (Source: debates2025-09-03.txt)
+    Method Analysis: Winner: Dense Retrieval. This is a critical win for Dense. BM25 retrieved an older document (2023) because it had the exact phrase "Net Zero targets" repeated multiple times. Dense Retrieval prioritized the 2025 document because it matched the intent of "latest update" combined with the Decay function, even though the phrasing was "clean energy opportunity".
+
+Custom Query: Immigration (Evolution)
+q7: "How has the policy regarding illegal immigration changed?"
+
+a7: Temporal Logic: Evolutionary.
+    Method 1: BM25 (Sparse) Answer: Early: "Stopping the boats", "Rwanda". Late: "Border Security", "Smuggling gangs".
+    Method 2: Dense Retrieval Answer: Early: Focused on deterrence and third-country processing. Late: Focused on intelligence-led enforcement and dismantling criminal networks.
+    Method Analysis: Winner: Tie. Both methods clearly identified the vocabulary shift. BM25 was sufficient because the specific policy names ("Rwanda" vs "Border Security Command") are distinct and unique keywords.
+
+Custom Query: Ukraine (Evolution)
+q8: "How did the discussions regarding Ukraine support evolve from 2023 to 2025?"
+
+a8: Temporal Logic: Evolutionary.
+    Method 1: BM25 (Sparse) Answer: Early: Sending tanks and ammunition. Late: Sending financial aid and security pacts.
+    Method 2: Dense Retrieval Answer: Early: Immediate provision of tactical equipment for the battlefield. Late: Long-term security guarantees and pathways to NATO accession.
+    Method Analysis: Winner: Dense Retrieval. Dense vectors linked "NATO accession" and "security guarantees" as the logical evolution of "support", whereas BM25 focused primarily on lists of equipment.
+
+
+
+In Summary:
+as we can see in the resolts 
+BM25 is excellent for Entity Retrieval (Names, Budget figures, Specific Policy names).
+Dense Retrieval is superior for Concept Retrieval (Rhetoric, Stance, Trends). It prevents failures when vocabulary changes over time.
+
