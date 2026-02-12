@@ -5,11 +5,14 @@ import os
 import re
 import time
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 
+import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 from openai import OpenAI
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 from config import CONFIG
 from io_utils import normalize_distribution
@@ -44,6 +47,17 @@ def _build_topics_block(country: str) -> str:
     return "\n".join(lines)
 
 
+def _load_topic_texts(country: str) -> Dict[int, str]:
+    table = load_topic_table(country).sort_values("topic_rank")
+    topic_texts: Dict[int, str] = {}
+    for _, row in table.iterrows():
+        rank = int(row["topic_rank"])
+        label = str(row["label"])
+        keywords = str(row["keywords"])
+        topic_texts[rank] = f"{label}. {keywords}"
+    return topic_texts
+
+
 def _build_context(window_docs: pd.DataFrame, top_k: int = 20) -> str:
     if window_docs.empty:
         return "No documents in this time window."
@@ -69,6 +83,22 @@ def _parse_scores(raw: str) -> List[float]:
 
 
 class RAGScorer:
+    backend_name = "base"
+
+    def score_window(
+        self,
+        country: str,
+        channel: str,
+        time_label: str,
+        window_docs: pd.DataFrame,
+        use_graph_context: str | None = None,
+    ) -> List[float]:
+        raise NotImplementedError
+
+
+class OpenRouterRAGScorer(RAGScorer):
+    backend_name = "openrouter"
+
     def __init__(self, model: str = "google/gemini-2.0-flash-exp:free"):
         load_dotenv()
         api_key = os.getenv("OPENROUTER_API_KEY")
@@ -132,12 +162,79 @@ class RAGScorer:
         return values
 
 
+class LocalRAGScorer(RAGScorer):
+    backend_name = "local"
+
+    def _score_docs(
+        self,
+        topic_texts: Dict[int, str],
+        docs: List[str],
+        graph_context: str | None,
+    ) -> List[float]:
+        if not docs:
+            return normalize_distribution([0.0] * CONFIG.stage.topic_count)
+
+        corpus = [topic_texts[i] for i in range(1, CONFIG.stage.topic_count + 1)] + docs
+        if graph_context:
+            corpus.append(graph_context)
+
+        vectorizer = TfidfVectorizer(stop_words="english", max_features=10000)
+        matrix = vectorizer.fit_transform(corpus)
+
+        topic_mat = matrix[: CONFIG.stage.topic_count]
+        doc_mat = matrix[CONFIG.stage.topic_count : CONFIG.stage.topic_count + len(docs)]
+
+        sim = cosine_similarity(topic_mat, doc_mat)
+        topic_scores = np.maximum(0.0, sim).sum(axis=1)
+
+        if graph_context:
+            graph_vec = matrix[-1]
+            graph_sim = cosine_similarity(topic_mat, graph_vec)
+            topic_scores = topic_scores + (0.2 * np.maximum(0.0, graph_sim.reshape(-1)))
+
+        return normalize_distribution(topic_scores.tolist())
+
+    def score_window(
+        self,
+        country: str,
+        channel: str,
+        time_label: str,
+        window_docs: pd.DataFrame,
+        use_graph_context: str | None = None,
+    ) -> List[float]:
+        cache = _load_cache(channel)
+        cache_key = f"{time_label}|graph={bool(use_graph_context)}|backend=local"
+        if cache_key in cache:
+            return cache[cache_key]
+
+        topic_texts = _load_topic_texts(country)
+        docs = []
+        if not window_docs.empty:
+            ranked_docs = window_docs.copy()
+            ranked_docs["length"] = ranked_docs["text"].str.len()
+            ranked_docs = ranked_docs.sort_values(["date", "length"], ascending=[False, False]).head(40)
+            docs = [str(t)[:2000] for t in ranked_docs["text"].tolist()]
+
+        values = self._score_docs(topic_texts, docs, use_graph_context)
+        cache[cache_key] = values
+        _save_cache(channel, cache)
+        return values
+
+
+def build_scorer(backend: str | None = None) -> RAGScorer:
+    backend = (backend or os.getenv("RAG_BACKEND", "local")).strip().lower()
+    if backend == "openrouter":
+        return OpenRouterRAGScorer()
+    return LocalRAGScorer()
+
+
 def compute_rag_scores(
     docs: pd.DataFrame,
-    temporal_scores: Dict[str, object],
+    temporal_scores: Dict[str, Any],
     graph_context: Dict[str, Dict[str, str]] | None = None,
+    backend: str | None = None,
 ) -> Dict[str, pd.DataFrame]:
-    scorer = RAGScorer()
+    scorer = build_scorer(backend=backend)
     outputs: Dict[str, pd.DataFrame] = {}
     graph_context = graph_context or {}
 

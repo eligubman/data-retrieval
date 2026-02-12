@@ -15,12 +15,21 @@ The pipeline reads the original shared dataset from `files.zip` (nested archives
 
 - Python 3.11+
 - `uv` installed
-- `OPENROUTER_API_KEY` set in environment (required for RAG/GraphRAG)
+- Local mode works out of the box (no external API needed)
+- Optional: `OPENROUTER_API_KEY` only if you want remote LLM scoring
 
-Example:
+Optional (only for remote backend):
 
 ```bash
 export OPENROUTER_API_KEY="your_key_here"
+```
+
+Backend selection (default is local):
+
+```bash
+export RAG_BACKEND=local      # default, no API
+# or
+export RAG_BACKEND=openrouter # uses OPENROUTER_API_KEY
 ```
 
 ## Quick Start (Recommended)
