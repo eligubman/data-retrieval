@@ -33,21 +33,42 @@ Exercise Bonus/
 ## Running the Analysis
 
 ```bash
-# From exercises/ directory
+# From exercises/src/
 cd "Exercise Bonus"
 
-# Stage A: Topic Discovery
-python src/stage_a_discover_topics.py
+# Install dependencies
+python -m pip install -r requirements.txt
 
-# Stage B: Temporal Dynamics
-python src/stage_b_dynamics.py
-
-# Stage C: Knowledge Graph
-python src/stage_c_knowledge_graph.py
-
-# Stage D: Influence Analysis
-python src/stage_d_influence_analysis.py
+# Run full pipeline
+python src/run_all.py
 ```
+
+Or run stages separately:
+
+```bash
+python src/run_stage_a.py
+python src/run_stage_b.py
+python src/run_stage_d.py --method rag
+python src/run_stage_c.py
+python src/run_stage_d.py --method topic_model
+```
+
+## Deliverables Produced
+
+- `results/excel/*_topic_model.xlsx` - 4 channel files for Method 1
+- `results/excel/*_rag.xlsx` - 4 channel files for Method 2
+- `results/excel/*_graphrag.xlsx` - GraphRAG extension outputs
+- `results/excel/topics_catalog.xlsx` - topic name + BERTopic keywords
+- `results/tables/stage_d_*_influence_summary.csv` - lag/correlation/DTW/edit-distance
+- `results/tables/stage_c_rag_vs_graphrag.csv` - RAG vs GraphRAG comparison table
+- `results/graphs/` - topic frequency, time-series plots, and graph visualizations
+
+## Important Output Conventions
+
+- Every time window has 20 topic scores in `0..1`.
+- Topic scores are normalized to sum to `1.000` per row.
+- Sliding windows are 14 days with a 7-day step.
+- Lag analysis checks offsets from `-3` to `+3`.
 
 ## Notes
 
