@@ -23,6 +23,8 @@ dependencies = [
   "tqdm",
   "rapidfuzz",
   "scipy",
+  "langchain",
+  "langchain-community",
 ]
 
 [build-system]

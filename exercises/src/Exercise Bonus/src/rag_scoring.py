@@ -10,6 +10,8 @@ from typing import Any, Dict, List
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
+from langchain_community.retrievers import BM25Retriever
+from langchain_core.documents import Document
 from openai import OpenAI
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -221,10 +223,94 @@ class LocalRAGScorer(RAGScorer):
         return values
 
 
+class LangChainBM25RAGScorer(RAGScorer):
+    backend_name = "langchain_bm25"
+
+    def _topic_queries(
+        self,
+        country: str,
+        use_graph_context: str | None,
+    ) -> Dict[int, str]:
+        table = load_topic_table(country).sort_values("topic_rank")
+        queries: Dict[int, str] = {}
+        graph_tail = f" {use_graph_context}" if use_graph_context else ""
+        for _, row in table.iterrows():
+            rank = int(row["topic_rank"])
+            label = str(row["label"])
+            keywords = str(row["keywords"])
+            queries[rank] = f"{label}. {keywords}.{graph_tail}"
+        return queries
+
+    def _build_retriever(self, window_docs: pd.DataFrame, k: int = 12) -> BM25Retriever | None:
+        if window_docs.empty:
+            return None
+
+        ranked_docs = window_docs.copy()
+        ranked_docs["length"] = ranked_docs["text"].str.len()
+        ranked_docs = ranked_docs.sort_values(["date", "length"], ascending=[False, False]).head(120)
+
+        docs = [
+            Document(
+                page_content=str(row["text"])[:3000],
+                metadata={"filename": str(row["filename"]), "date": str(row["date"])},
+            )
+            for _, row in ranked_docs.iterrows()
+            if str(row["text"]).strip()
+        ]
+
+        if not docs:
+            return None
+
+        retriever = BM25Retriever.from_documents(docs)
+        retriever.k = k
+        return retriever
+
+    def _score_from_ranked_docs(self, docs: List[Document]) -> float:
+        if not docs:
+            return 0.0
+        # Reciprocal-rank style aggregation: emphasizes top hits while
+        # remaining stable for different window sizes.
+        return float(sum(1.0 / (i + 1) for i in range(len(docs))))
+
+    def score_window(
+        self,
+        country: str,
+        channel: str,
+        time_label: str,
+        window_docs: pd.DataFrame,
+        use_graph_context: str | None = None,
+    ) -> List[float]:
+        cache = _load_cache(channel)
+        cache_key = f"{time_label}|graph={bool(use_graph_context)}|backend=langchain_bm25"
+        if cache_key in cache:
+            return cache[cache_key]
+
+        retriever = self._build_retriever(window_docs)
+        if retriever is None:
+            values = normalize_distribution([0.0] * CONFIG.stage.topic_count)
+            cache[cache_key] = values
+            _save_cache(channel, cache)
+            return values
+
+        queries = self._topic_queries(country, use_graph_context)
+        scores: List[float] = []
+        for topic_rank in range(1, CONFIG.stage.topic_count + 1):
+            query = queries[topic_rank]
+            docs = retriever.get_relevant_documents(query)
+            scores.append(self._score_from_ranked_docs(docs))
+
+        values = normalize_distribution(scores)
+        cache[cache_key] = values
+        _save_cache(channel, cache)
+        return values
+
+
 def build_scorer(backend: str | None = None) -> RAGScorer:
-    backend = (backend or os.getenv("RAG_BACKEND", "local")).strip().lower()
+    backend = (backend or os.getenv("RAG_BACKEND", "langchain_bm25")).strip().lower()
     if backend == "openrouter":
         return OpenRouterRAGScorer()
+    if backend in {"langchain", "langchain_bm25", "bm25"}:
+        return LangChainBM25RAGScorer()
     return LocalRAGScorer()
 
 

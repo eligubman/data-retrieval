@@ -24,10 +24,12 @@ Optional (only for remote backend):
 export OPENROUTER_API_KEY="your_key_here"
 ```
 
-Backend selection (default is local):
+Backend selection (default is local LangChain BM25):
 
 ```bash
-export RAG_BACKEND=local      # default, no API
+export RAG_BACKEND=langchain_bm25  # default, no API, uses LangChain BM25
+# or
+export RAG_BACKEND=local           # tf-idf fallback, no API
 # or
 export RAG_BACKEND=openrouter # uses OPENROUTER_API_KEY
 ```

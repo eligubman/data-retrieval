@@ -16,3 +16,5 @@ openai
 tqdm
 rapidfuzz
 scipy
+langchain
+langchain-community
