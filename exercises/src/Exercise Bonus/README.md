@@ -1,58 +1,42 @@
 # Exercise Bonus: Political-Media Influence Dynamics
 
-**Authors:** Ephraim Elgrabli & Elihu Gubman  
-**Due:** Sunday 9:00 AM  
-**Points:** Up to 8 bonus points
+End-to-end pipeline for the bonus assignment question: **"Who leads whom?"** between politics and media in the UK and US.
 
-## Research Question
+## What This Repository Runs
 
-**"Who leads whom?"** - Does the political system dictate the media agenda, or does media influence political discourse?
+- Stage A: topic discovery with BERTopic (20 topics per country).
+- Stage B: temporal dominance scoring (Topic Modeling method + RAG method).
+- Stage C: Knowledge Graph + GraphRAG comparison.
+- Stage D: influence direction analysis (lagged correlation, DTW, numeric edit similarity).
 
-## Implementation Plan
+The pipeline reads the original shared dataset from `files.zip` (nested archives + Excel templates).
 
-See `../BONUS_ASSIGNMENT.md` for full assignment details.
+## Prerequisites
 
-### Data Structure
+- Python 3.11+
+- `uv` installed
+- `OPENROUTER_API_KEY` set in environment (required for RAG/GraphRAG)
 
-```
-Exercise Bonus/
-├── data/              # Raw data (from Google Drive)
-│   ├── uk_parliament/
-│   ├── uk_media/
-│   ├── us_congress/
-│   └── us_media/
-├── src/               # Source code
-├── results/           # Outputs
-│   ├── excel/        # 8 Excel files + topics file
-│   ├── graphs/       # Visualizations
-│   └── tables/       # Analysis tables
-├── notebooks/         # Jupyter notebooks
-└── README.md         # This file
-```
-
-## Running the Analysis
+Example:
 
 ```bash
-# From exercises/src/
-cd "Exercise Bonus"
+export OPENROUTER_API_KEY="your_key_here"
+```
 
-# uv workflow (recommended)
+## Quick Start (Recommended)
+
+```bash
+cd "Exercise Bonus"
 uv sync
 uv run python src/run_all.py
 ```
 
-Alternative pip workflow:
+## Run Stage by Stage
+
+Run in this exact order (Stage C depends on Stage D RAG outputs):
 
 ```bash
-python -m pip install -r requirements.txt
-
-# Run full pipeline
-python src/run_all.py
-```
-
-Or run stages separately:
-
-```bash
+cd "Exercise Bonus"
 uv run python src/run_stage_a.py
 uv run python src/run_stage_b.py
 uv run python src/run_stage_d.py --method rag
@@ -60,25 +44,51 @@ uv run python src/run_stage_c.py
 uv run python src/run_stage_d.py --method topic_model
 ```
 
-## Deliverables Produced
+## Expected Outputs
 
-- `results/excel/*_topic_model.xlsx` - 4 channel files for Method 1
-- `results/excel/*_rag.xlsx` - 4 channel files for Method 2
-- `results/excel/*_graphrag.xlsx` - GraphRAG extension outputs
-- `results/excel/topics_catalog.xlsx` - topic name + BERTopic keywords
-- `results/tables/stage_d_*_influence_summary.csv` - lag/correlation/DTW/edit-distance
-- `results/tables/stage_c_rag_vs_graphrag.csv` - RAG vs GraphRAG comparison table
-- `results/graphs/` - topic frequency, time-series plots, and graph visualizations
+### Required numeric files
 
-## Important Output Conventions
+- `results/excel/uk_parliament_topic_model.xlsx`
+- `results/excel/uk_media_topic_model.xlsx`
+- `results/excel/us_congress_topic_model.xlsx`
+- `results/excel/us_media_topic_model.xlsx`
+- `results/excel/uk_parliament_rag.xlsx`
+- `results/excel/uk_media_rag.xlsx`
+- `results/excel/us_congress_rag.xlsx`
+- `results/excel/us_media_rag.xlsx`
 
-- Every time window has 20 topic scores in `0..1`.
-- Topic scores are normalized to sum to `1.000` per row.
-- Sliding windows are 14 days with a 7-day step.
-- Lag analysis checks offsets from `-3` to `+3`.
+### Additional analysis files
 
-## Notes
+- `results/excel/topics_catalog.xlsx` (topic name + BERTopic keywords)
+- `results/excel/*_graphrag.xlsx`
+- `results/tables/stage_d_rag_influence_summary.csv`
+- `results/tables/stage_d_topic_model_influence_summary.csv`
+- `results/tables/stage_c_rag_vs_graphrag.csv`
+- `results/graphs/*.png`
 
-- Reusing utilities from previous exercises where applicable
-- Following same code quality standards as Exercises 1-4
-- All commits will be atomic and descriptive
+## Scoring Conventions
+
+- Each time point has 20 topic scores in range `0..1`.
+- Scores are normalized so each row sums to `1.000`.
+- Sliding window is 14 days with 7-day step.
+- Lag search range is `-3..+3`.
+
+## What To Do After Running
+
+1. Verify all 8 required Excel files were created under `results/excel`.
+2. Verify per-row sum in those files is exactly `1.000` (within rounding tolerance).
+3. Use `results/graphs` + `results/tables` to write the final report.
+4. Fill/report using `REPORT_TEMPLATE.md`.
+
+## Report Writing Checklist
+
+- Describe corpora + overlap time ranges used.
+- Explain methodology (BERTopic, RAG, GraphRAG, lag/DTW/edit metrics).
+- Present 10 topics per country with direction + lag + interpretation.
+- Include amplitude and amplitude-gap interpretation.
+- Compare UK vs US patterns and discuss why differences may occur.
+- Add limitations/biases and concrete improvement ideas.
+
+## Assignment Reference
+
+See `../BONUS_ASSIGNMENT.md` for the official full instructions.
