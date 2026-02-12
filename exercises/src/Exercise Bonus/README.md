@@ -36,7 +36,14 @@ Exercise Bonus/
 # From exercises/src/
 cd "Exercise Bonus"
 
-# Install dependencies
+# uv workflow (recommended)
+uv sync
+uv run python src/run_all.py
+```
+
+Alternative pip workflow:
+
+```bash
 python -m pip install -r requirements.txt
 
 # Run full pipeline
@@ -46,11 +53,11 @@ python src/run_all.py
 Or run stages separately:
 
 ```bash
-python src/run_stage_a.py
-python src/run_stage_b.py
-python src/run_stage_d.py --method rag
-python src/run_stage_c.py
-python src/run_stage_d.py --method topic_model
+uv run python src/run_stage_a.py
+uv run python src/run_stage_b.py
+uv run python src/run_stage_d.py --method rag
+uv run python src/run_stage_c.py
+uv run python src/run_stage_d.py --method topic_model
 ```
 
 ## Deliverables Produced

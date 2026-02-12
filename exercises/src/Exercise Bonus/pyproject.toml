@@ -1,0 +1,30 @@
+[project]
+name = "exercise-bonus-influence"
+version = "0.1.0"
+description = "Bonus exercise pipeline for political-media influence dynamics"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "bertopic",
+  "hdbscan",
+  "umap-learn",
+  "sentence-transformers",
+  "scikit-learn",
+  "numpy",
+  "pandas",
+  "matplotlib",
+  "seaborn",
+  "openpyxl",
+  "networkx",
+  "spacy",
+  "python-dateutil",
+  "python-dotenv",
+  "openai",
+  "tqdm",
+  "rapidfuzz",
+  "scipy",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
