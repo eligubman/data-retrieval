@@ -15,8 +15,8 @@ def _run(script: str, *args: str) -> None:
 
 
 def main() -> None:
-    _run("run_stage_a.py")
-    _run("run_stage_b.py")
+    #_run("run_stage_a.py")
+    #_run("run_stage_b.py")
     _run("run_stage_d.py", "--method", "rag")
     _run("run_stage_c.py")
     _run("run_stage_d.py", "--method", "topic_model")

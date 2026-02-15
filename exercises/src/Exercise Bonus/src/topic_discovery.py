@@ -122,8 +122,14 @@ def save_topics_catalog_excel(uk_topics: pd.DataFrame, us_topics: pd.DataFrame) 
 
 def load_topic_model(country: str) -> BERTopic:
     model_path = CONFIG.paths.cache / f"bertopic_{country.lower()}.pkl"
-    with model_path.open("rb") as fh:
-        return pickle.load(fh)
+    try:
+        with model_path.open("rb") as fh:
+            return pickle.load(fh)
+    except (pickle.UnpicklingError, EOFError) as e:
+        print(f"Warning: Corrupted pickle file for {country}, removing and will need to retrain")
+        if model_path.exists():
+            model_path.unlink()
+        raise ValueError(f"Model file corrupted for {country}. Please re-run Stage A.") from e
 
 
 def load_topic_table(country: str) -> pd.DataFrame:

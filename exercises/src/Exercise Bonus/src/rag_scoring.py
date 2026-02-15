@@ -176,15 +176,16 @@ class LocalRAGScorer(RAGScorer):
         if not docs:
             return normalize_distribution([0.0] * CONFIG.stage.topic_count)
 
-        corpus = [topic_texts[i] for i in range(1, CONFIG.stage.topic_count + 1)] + docs
+        corpus = [topic_texts[i] for i in range(1, CONFIG.stage.topic_count + 1) if i in topic_texts] + docs
         if graph_context:
             corpus.append(graph_context)
 
         vectorizer = TfidfVectorizer(stop_words="english", max_features=10000)
         matrix = vectorizer.fit_transform(corpus)
 
-        topic_mat = matrix[: CONFIG.stage.topic_count]
-        doc_mat = matrix[CONFIG.stage.topic_count : CONFIG.stage.topic_count + len(docs)]
+        actual_topic_count = len([i for i in range(1, CONFIG.stage.topic_count + 1) if i in topic_texts])
+        topic_mat = matrix[: actual_topic_count]
+        doc_mat = matrix[actual_topic_count : actual_topic_count + len(docs)]
 
         sim = cosine_similarity(topic_mat, doc_mat)
         topic_scores = np.maximum(0.0, sim).sum(axis=1)
@@ -268,8 +269,6 @@ class LangChainBM25RAGScorer(RAGScorer):
     def _score_from_ranked_docs(self, docs: List[Document]) -> float:
         if not docs:
             return 0.0
-        # Reciprocal-rank style aggregation: emphasizes top hits while
-        # remaining stable for different window sizes.
         return float(sum(1.0 / (i + 1) for i in range(len(docs))))
 
     def score_window(
@@ -293,13 +292,32 @@ class LangChainBM25RAGScorer(RAGScorer):
             return values
 
         queries = self._topic_queries(country, use_graph_context)
-        scores: List[float] = []
-        for topic_rank in range(1, CONFIG.stage.topic_count + 1):
-            query = queries[topic_rank]
-            docs = retriever.get_relevant_documents(query)
-            scores.append(self._score_from_ranked_docs(docs))
+        
+        # Determine if data is 0-indexed or 1-indexed based on what's in 'queries'
+        # and pre-fill a results dictionary.
+        scores_map: Dict[int, float] = {}
+        
+        for topic_rank, query in queries.items():
+            # .invoke() replaces deprecated .get_relevant_documents()
+            relevant_docs = retriever.invoke(query)
+            scores_map[topic_rank] = self._score_from_ranked_docs(relevant_docs)
 
-        values = normalize_distribution(scores)
+        # Build final list ensuring it follows CONFIG.stage.topic_count
+        # We try to find keys 1..N, but fallback to 0..N-1 if 1..N fails
+        final_scores = []
+        possible_keys_1 = range(1, CONFIG.stage.topic_count + 1)
+        possible_keys_0 = range(0, CONFIG.stage.topic_count)
+        
+        # Detect which indexing strategy is actually in the data
+        if any(k in scores_map for k in possible_keys_1):
+            target_range = possible_keys_1
+        else:
+            target_range = possible_keys_0
+
+        for r in target_range:
+            final_scores.append(scores_map.get(r, 0.0))
+
+        values = normalize_distribution(final_scores)
         cache[cache_key] = values
         _save_cache(channel, cache)
         return values
