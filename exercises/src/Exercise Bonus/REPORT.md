@@ -414,4 +414,19 @@ Our analysis reveals a **nuanced, topic-dependent** relationship:
 
 ---
 
+## TL;DR
+
+> We analyzed **4 corpora** (UK Parliament, BBC, US Congress, NBC) to answer **"Who leads whom?"** between politics and media.
+>
+> **Method:** BERTopic (20 topics/country) → sliding-window dominance scoring (topic model + BM25 RAG) → Knowledge Graph + GraphRAG comparison → influence direction via lagged correlation, DTW, and edit similarity.
+>
+> **Key findings:**
+> - 🏛️ **Politics leads media** on legislative topics: UK policy debates (lag +1, r=0.315), US tariffs/trade (lag +3, r=0.355), UK BBC charter discussions (lag +3, r=0.195)
+> - 📺 **Media leads politics** on public-interest topics: UK sports (lag −2, r=0.384 — strongest signal), US disaster coverage (lag −1, r=0.276), US Musk/tech news (lag −1, r=0.167)
+> - ❓ **~80% of topics show no clear directional influence** — politics and media largely operate on independent agendas
+>
+> **Bottom line:** There is no universal answer. The direction of influence is **topic-dependent**: legislatures lead on policy they create, media leads on events it covers first. Most discourse runs in parallel.
+
+---
+
 *Report generated on 2026-02-15. All analyses are reproducible via `uv run python src/run_all.py`.*
